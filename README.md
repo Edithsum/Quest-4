@@ -28,3 +28,38 @@ The diagram below illustrates the sequence of steps and interactions between the
 ![Workflow Diagram](./Image/flow.png)
 
 
+# Code Explanation
+
+## Overview
+
+This script is designed to interact with two prominent DeFi protocols: Uniswap and Aave. It starts by swapping USDC for LINK on Uniswap, followed by depositing the obtained LINK into Aave's lending pool to earn interest. The script is structured to efficiently handle these interactions using the Ethereum Sepolia testnet.
+
+### Key Functions and Logic
+
+#### 1. **approveToken Function**
+```javascript
+async function approveToken(tokenAddress, tokenABI, amount, wallet) {
+  try {
+    const tokenContract = new ethers.Contract(tokenAddress, tokenABI, wallet);
+    const approveAmount = ethers.parseUnits(amount.toString(), USDC.decimals);
+    const approveTransaction = await tokenContract.approve.populateTransaction(
+      SWAP_ROUTER_CONTRACT_ADDRESS,
+      approveAmount
+    );
+    const transactionResponse = await wallet.sendTransaction(
+      approveTransaction
+    );
+    console.log(-------------------------------);
+    console.log(Sending Approval Transaction...);
+    console.log(-------------------------------);
+    console.log(Transaction Sent: ${transactionResponse.hash});
+    console.log(-------------------------------);
+    const receipt = await transactionResponse.wait();
+    console.log(
+      Approval Transaction Confirmed! https://sepolia.etherscan.io/tx/${receipt.hash}
+    );
+  } catch (error) {
+    console.error("An error occurred during token approval:", error);
+    throw new Error("Token approval failed");
+  }
+}
